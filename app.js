@@ -15,7 +15,7 @@ app.use(bodyParser.json());
 app.use('/api/user', authRoute);
 
 // Connect to db
-mongoose.connect(process.env.MONGODB_URI, {useUnifiedTopology: true}, (error) => {
+mongoose.connect(process.env.MONGODB_URI, {useNewUrlParser:true, useUnifiedTopology: true}, (error) => {
 
     if(error)
     {

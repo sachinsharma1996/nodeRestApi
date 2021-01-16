@@ -18,4 +18,13 @@ function verifyJWT(req, res, next){
     next();
 };
 
+function randomCode(req, res, next){
+    req.emailVerificationCode = Math.floor(100000 + Math.random() * 900000);
+    req.mobileVerificationCode = Math.floor(100000 + Math.random() * 900000);
+    next();
+};
+module.exports = {
+    verifyJWT: verifyJWT,
+    Code: randomCode
+}
 module.exports = verifyJWT

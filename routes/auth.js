@@ -17,13 +17,16 @@ router.post('/signup', async (req, res)=>{
 
     const user = new UserModel.User({
         email: req.body.email,
-        password: hashPassword
+        password: hashPassword,
+        mobile: req.body.mobile
     });
     try {
         const SaveUser = await user.save();
-        res.status(200).json({
-            _id: SaveUser.id,
-            msg: "successfully added"
+        const jwToken = jwt.sign({'id': SaveUser.id}, process.env.SIGNATURE_TOKEN)
+        res.header(
+            'jwt-token', jwToken
+        ).status(200).json({
+            msg: "successfully Signup"
         })
     } catch(error) {
         res.status(500).send(error);
@@ -38,49 +41,44 @@ router.post('/login', async (req, res) =>{
         msg: "Email Or Password Is Incorrect" 
     });
     
-    const validhash = await bcrypt.compare(req.body.password, thisUser.password);
-    if(!validhash) return res.status(409).json({
+    const validHash = await bcrypt.compare(req.body.password, thisUser.password);
+    if(!validHash) return res.status(409).json({
         msg: "Password Is Incorrect" 
     });
     
     const jwToken = jwt.sign({'id': thisUser.id}, process.env.SIGNATURE_TOKEN)
     res.header('jwt-token', jwToken).send(jwToken)
-    
-});
-
-router.get('/profile', verifyJWT, async (req, res) =>{
-    
-    const thisUser = await UserModel.User.findOne({_id: req.user.id});
-    if(!thisUser) return res.status(409).json({
-        msg: "User is Not Exist" 
-    });
-    
-    res.status(200).json({
-        firstName: thisUser.firstName,
-        lastName: thisUser.lastName,
-        email: thisUser.email
+    res.status(201).json({
+        msg: "successfully Login"
     })
     
 });
 
-router.put('/profile', verifyJWT, async (req, res) =>{
-    
-    const thisUser = await UserModel.User.findOne({_id: req.user.id});
+router.get('/otp-verification', async (req, res) =>{
+
     try {
-        thisUser.firstName = req.body.firstName;
-        thisUser.lastName = req.body.lastName;
+        const thisUser = await UserModel.User.findOne({_id: req.user.id});
+        if(!thisUser) return res.status(409).json({
+            msg: "User is Not Exist"
+        });
+        const UserUtils = new UserModel.UserUtils({
+            emailVerificationCode: req.emailVerificationCode,
+            mobileVerificationCode: req.mobileVerificationCode
+        });
+        thisUser.UserUtils.push(UserUtils)
         thisUser.save()
+
         res.status(200).json({
-            msg: "successfully Updated"
+            msg: "successfully send"
         });
+    } catch(error) {
+        console.log(error)
+        res.status(500).send(error);
     }
-    catch (error) {
-        res.status(200).json({
-            error: error
-        });
-    }
-    
+
 });
+
+
 
 
 module.exports = router;

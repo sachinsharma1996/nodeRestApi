@@ -2,6 +2,27 @@ mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
 
+var UserUtilsSchema = new Schema({
+    emailVerificationCode: {
+        type: Number,
+        required: true,
+        unique: true,
+        validate: {
+            validator : Number.isInteger,
+            message   : '{VALUE} is not an integer value'
+        }
+    },
+    mobileVerificationCode: {
+        type: Number,
+        required: true,
+        unique: true,
+        validate: {
+            validator : Number.isInteger,
+            message   : '{VALUE} is not an integer value'
+        }
+    }
+})
+
 const UserSchema = new Schema({
     email: {
         type: String,
@@ -11,6 +32,11 @@ const UserSchema = new Schema({
         type: String,
         required: true
     },
+    mobile: {
+        type: String,
+        required: true
+    },
+    UserUtils: [UserUtilsSchema],
     firstName: {
         type: String
     },
@@ -25,4 +51,6 @@ const UserSchema = new Schema({
         type: Date
     }
 })
+
 module.exports.User = mongoose.model('User', UserSchema)
+module.exports.UserUtils = mongoose.model('UserUtils', UserUtilsSchema)
